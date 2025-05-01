@@ -10,9 +10,9 @@
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="1dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,50 +24,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/gridSwitch"
+            <Space
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:text="Mřížka"
-                android:textOff="Vypnuto"
-                android:textOn="Zapnuto"
-                android:textSize="20sp" />
+                android:layout_height="10dp" />
 
-            <TextView
-                android:id="@+id/gridWidthText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Počet sloupců"
-                android:textAppearance="?attr/textAppearanceBodyMedium"
-                android:textSize="20sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <com.google.android.material.slider.Slider
-                    android:id="@+id/gridWidth"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:stepSize="1"
-                    android:value="4"
-                    android:valueFrom="2"
-                    android:valueTo="5"
-                    app:labelBehavior="gone" />
-
-                <TextView
-                    android:id="@+id/widthLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="8"
-                    android:text="4"
-                    android:textSize="20sp" />
-            </LinearLayout>
 
             <TextView
                 android:id="@+id/textView"
@@ -88,8 +48,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:fontFamily="@font/abeezee"
-                    android:text="abeezee" />
+                    android:fontFamily="@font/biorhyme"
+                    android:text="biorhyme" />
 
                 <Button
                     android:id="@+id/fontButton2"
@@ -116,6 +76,115 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:textSize="50sp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/gridSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mřížka"
+                android:textOff="Vypnuto"
+                android:textOn="Zapnuto"
+                android:textSize="20sp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/gridWidthText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Počet sloupců"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:gravity="center_horizontal|center_vertical"
+                android:orientation="horizontal">
+
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/gridWidth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:stepSize="1"
+                    android:value="4"
+                    android:valueFrom="2"
+                    android:valueTo="6"
+                    app:labelBehavior="gone" />
+
+                <TextView
+                    android:id="@+id/widthLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="10"
+                    android:text="4"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/iconSizeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Velikost ikon"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textSize="20sp" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/iconSizeSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:value="54"
+                android:valueFrom="40"
+                android:valueTo="65"
+                app:labelBehavior="gone" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/textSizeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Velikost popisků"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textSize="20sp" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/textSizeSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:value="20"
+                android:valueFrom="10"
+                android:valueTo="30"
+                app:labelBehavior="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/icon_preview_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:padding="8dp" />
+
+
 
         </LinearLayout>
     </ScrollView>

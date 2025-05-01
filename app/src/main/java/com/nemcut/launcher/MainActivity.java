@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,6 +22,7 @@ import android.provider.AlarmClock;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -37,6 +41,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
     Adapter adapter;
-    List<AppInfo> appList = new ArrayList<>();
+    public static List<AppInfo> appList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +96,10 @@ public class MainActivity extends AppCompatActivity {
                 icon = getDrawable(R.mipmap.ic_launcher);
             }
 
-            appList.add(new AppInfo(label, packageName, icon));
+
+            Drawable scaledIcon = resizeDrawable(this, icon, 60, 60);  // 54 dp na px
+            appList.add(new AppInfo(label, packageName, scaledIcon));
+            //appList.add(new AppInfo(label, packageName, icon));
         }
 
         //seřazení listu podle abecedy
@@ -120,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
         //vibrování při dosažení začátu/konce
         recyclerView = findViewById(R.id.recyclerView);
+        //NestedScrollView nsv = findViewById(R.id.nsv);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -251,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         boolean gridEnabled = prefs.getBoolean("grid_enabled", false);
         int gridColumns = prefs.getInt("grid_columns", 4);
+        int iconSize = prefs.getInt("iconSize", 54);
+        int textSize = prefs.getInt("textSize", 20);
 
         RecyclerView.LayoutManager layoutManager;
         if (gridEnabled) {
@@ -258,20 +269,26 @@ public class MainActivity extends AppCompatActivity {
         } else {
             layoutManager = new LinearLayoutManager(this);
         }
+
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new Adapter(this, appList, gridEnabled);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemViewCacheSize(30);
+        recyclerView.setDrawingCacheEnabled(true);
+        recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        adapter = new Adapter(this, appList, gridEnabled,false,iconSize,textSize,gridColumns);
+        adapter.setHasStableIds(true);
         recyclerView.setAdapter(adapter);
     }
 
-    private void setClockFont(){
+    public void setClockFont(){
         TextClock clock = findViewById(R.id.textClock);
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         int clockFont = prefs.getInt("clockFont", 1);
         Typeface typeface = null;
         switch(clockFont) {
             case 1:
-                typeface = ResourcesCompat.getFont(this,R.font.abeezee);
+                typeface = ResourcesCompat.getFont(this,R.font.biorhyme);
                 break;
             case 2:
                 typeface = ResourcesCompat.getFont(this,R.font.akronim);
@@ -289,6 +306,19 @@ public class MainActivity extends AppCompatActivity {
         setupLayout();
         setClockFont();
     }
+
+    public static Drawable resizeDrawable(Context context, Drawable drawable, int dpWidth, int dpHeight) {
+        int widthPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpWidth, context.getResources().getDisplayMetrics());
+        int heightPx = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpHeight, context.getResources().getDisplayMetrics());
+
+        Bitmap bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return new BitmapDrawable(context.getResources(), bitmap);
+    }
+
 
 
 

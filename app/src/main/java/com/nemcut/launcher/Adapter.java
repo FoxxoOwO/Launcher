@@ -1,5 +1,7 @@
 package com.nemcut.launcher;
 
+import static androidx.core.util.TypedValueCompat.dpToPx;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -20,11 +22,22 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
     private List<AppInfo> appList;
     private Context context;
     private boolean isGrid;
+    private boolean isPreview;
+    private int iconSize;
+    private int textSize;
+    private int labelWidth;
 
-    public Adapter(Context context, List<AppInfo> appList, boolean isGrid) {
+    public Adapter(Context context, List<AppInfo> appList, boolean isGrid, boolean isPreview, int iconSize, int textSize, int gridColumns) {
         this.context = context;
         this.appList = appList;
         this.isGrid = isGrid;
+        this.isPreview = isPreview;
+        this.textSize = textSize;
+
+        this.labelWidth = 1300/gridColumns;
+
+        float density = context.getResources().getDisplayMetrics().density;
+        this.iconSize = Math.round(iconSize * density);
     }
 
     @NonNull
@@ -42,12 +55,28 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
         holder.label.setText(app.label);
         holder.icon.setImageDrawable(app.icon);
 
-        holder.itemView.setOnClickListener(v -> {
-            Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(app.packageName);
-            if (launchIntent != null) {
-                context.startActivity(launchIntent);
-            }
-        });
+        ViewGroup.LayoutParams params = holder.icon.getLayoutParams();
+
+        params.width = iconSize;
+        params.height = iconSize;
+        holder.icon.setLayoutParams(params);
+
+        if (isGrid) {
+            TextView label = holder.itemView.findViewById(R.id.label);
+            params = label.getLayoutParams();
+            params.width = labelWidth;
+            label.setLayoutParams(params);
+        }
+        holder.label.setTextSize(textSize);
+
+        if (!isPreview) {
+            holder.itemView.setOnClickListener(v -> {
+                Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(app.packageName);
+                if (launchIntent != null) {
+                    context.startActivity(launchIntent);
+                }
+            });
+        }
 
         holder.itemView.setOnLongClickListener(v -> {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -79,7 +108,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
         notifyDataSetChanged();
     }
 
-
+    @Override
+    public long getItemId(int position) {return position;}
 
 
 }
