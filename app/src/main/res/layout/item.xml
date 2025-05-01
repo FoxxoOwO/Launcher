@@ -20,6 +20,8 @@
         android:shadowColor="#000"
         android:shadowRadius="2"
         android:textColor="#FFFFFF"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:ellipsize="end"
+        android:maxLines="1"/>
 
 </LinearLayout>
