@@ -1,11 +1,10 @@
 package com.nemcut.launcher;
 
-import static androidx.core.util.TypedValueCompat.dpToPx;
-
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,21 +14,25 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
 
     private List<AppInfo> appList;
+    private List<AppInfo> ogList;
     private Context context;
     private boolean isGrid;
     private boolean isPreview;
     private int iconSize;
     private int textSize;
     private int labelWidth;
+    private String query;
 
     public Adapter(Context context, List<AppInfo> appList, boolean isGrid, boolean isPreview, int iconSize, int textSize, int gridColumns) {
         this.context = context;
         this.appList = appList;
+        this.ogList = appList;
         this.isGrid = isGrid;
         this.isPreview = isPreview;
         this.textSize = textSize;
@@ -103,10 +106,33 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
     }
 
 
-    public void filterList(List<AppInfo> filteredList) {
-        this.appList = filteredList;
+    public void filterList(String text) {
+        query = text;
+        if (text == null || text.trim().isEmpty()) {
+            appList = new ArrayList<>(ogList);
+            Log.d("AppChanges", "Zobrazen ogList");
+        } else {
+            List<AppInfo> tempList = new ArrayList<>();
+            for (AppInfo app : ogList) {
+                if (app.label.toLowerCase().contains(text.toLowerCase())) {
+                    tempList.add(app);
+                }
+            }
+            appList = tempList;
+        }
         notifyDataSetChanged();
     }
+
+    public void updateList(List<AppInfo> newList) {
+        Log.d("AppChanges", "Aktualizace ogList");
+        this.ogList = new ArrayList<>(newList);
+        filterList(query);
+
+
+        notifyDataSetChanged();
+    }
+
+
 
     @Override
     public long getItemId(int position) {return position;}

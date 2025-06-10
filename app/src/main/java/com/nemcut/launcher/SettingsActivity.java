@@ -1,12 +1,24 @@
 package com.nemcut.launcher;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
-import android.widget.SeekBar;
+import android.widget.LinearLayout;
 import android.widget.TextClock;
 import android.widget.TextView;
 
@@ -14,7 +26,6 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -45,6 +56,7 @@ public class SettingsActivity extends AppCompatActivity {
     private int clockFont;
     private int iconSize;
     private int textSize;
+    private Button defaultB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +78,9 @@ public class SettingsActivity extends AppCompatActivity {
         clock = findViewById(R.id.clock);
         iconSizeSlider = findViewById(R.id.iconSizeSlider);
         textSizeSlider = findViewById(R.id.textSizeSlider);
+        defaultB =  findViewById(R.id.defaultButton);
 
-
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         gridEnabled = prefs.getBoolean("grid_enabled", false);
@@ -95,19 +108,19 @@ public class SettingsActivity extends AppCompatActivity {
 
         fontButton1.setOnClickListener(v->{
             var tf = ResourcesCompat.getFont(this,R.font.biorhyme);
-            clock.setTypeface(tf);
+            animateClockFontChange(tf);
             prefs.edit().putInt("clockFont", 1).apply();
         });
 
         fontButton2.setOnClickListener(v->{
             var tf = ResourcesCompat.getFont(this,R.font.akronim);
-            clock.setTypeface(tf);
+            animateClockFontChange(tf);
             prefs.edit().putInt("clockFont", 2).apply();
         });
 
         fontButton3.setOnClickListener(v->{
             var tf = ResourcesCompat.getFont(this,R.font.ar_one_sans);
-            clock.setTypeface(tf);
+            animateClockFontChange(tf);
             prefs.edit().putInt("clockFont", 3).apply();
         });
 
@@ -117,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
         iconSizeSlider.setValue(iconSize);
         textSizeSlider.setValue(textSize);
 
-        getSupportActionBar().setTitle("Nastavení"); // nebo jiný text
+        getSupportActionBar().setTitle(R.string.settings); // nebo jiný text
 
         MaterialSwitch grid = findViewById(R.id.gridSwitch);
 
@@ -126,12 +139,35 @@ public class SettingsActivity extends AppCompatActivity {
         // showing the back button in action bar
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-
+        LinearLayout animatedContainer = findViewById(R.id.animatedContainer);
+        AutoTransition transition = new AutoTransition();
+        transition.setDuration(220);
+        transition.setInterpolator(new AccelerateDecelerateInterpolator());
         setupLayout();
 
         gridSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean("grid_enabled", isChecked).apply();
             gridEnabled = isChecked;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+                } else {
+                    vibrator.vibrate(10);
+                }
+            }
+//            fadeVisibility(findViewById(R.id.gridWidthText), isChecked);
+//            fadeVisibility(findViewById(R.id.gridWidthLayout), isChecked);
+//            fadeVisibility(findViewById(R.id.gridWidthSpace), isChecked);
+            TransitionManager.beginDelayedTransition(animatedContainer, transition);
+            if (isChecked) {
+                findViewById(R.id.gridWidthText).setVisibility(VISIBLE);
+                findViewById(R.id.gridWidthLayout).setVisibility(VISIBLE);
+                findViewById(R.id.gridWidthSpace).setVisibility(VISIBLE);
+            } else {
+                findViewById(R.id.gridWidthText).setVisibility(GONE);
+                findViewById(R.id.gridWidthLayout).setVisibility(GONE);
+                findViewById(R.id.gridWidthSpace).setVisibility(GONE);
+            }
             setupLayout();
         });
 
@@ -139,20 +175,64 @@ public class SettingsActivity extends AppCompatActivity {
             widthLabel.setText(String.valueOf((int) value));
             prefs.edit().putInt("grid_columns", (int) value).apply();
             gridColumns = (int) value;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+                } else {
+                    vibrator.vibrate(10);
+                }
+            }
             setupLayout();
         });
 
         iconSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
             prefs.edit().putInt("iconSize", (int) value).apply();
             iconSize = (int) value;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(3, 2));
+                } else {
+                    vibrator.vibrate(5);
+                }
+            }
             setupLayout();
         });
 
         textSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
             prefs.edit().putInt("textSize", (int) value).apply();
             textSize = (int) value;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(3, 2));
+                } else {
+                    vibrator.vibrate(5);
+                }
+            }
             setupLayout();
         });
+
+
+        defaultB.setOnClickListener(v -> {
+            Intent intent = new Intent(android.provider.Settings.ACTION_HOME_SETTINGS);
+            startActivity(intent);
+        });
+
+
+        if (isDefaultLauncher()) {
+            defaultB.setText(R.string.default_launcher_true);
+        } else {
+            defaultB.setText(R.string.default_launcher_false);
+        }
+
+        if (!gridEnabled) {
+            findViewById(R.id.gridWidthText).setVisibility(GONE);
+            findViewById(R.id.gridWidthLayout).setVisibility(GONE);
+            findViewById(R.id.gridWidthSpace).setVisibility(GONE);
+        }
+
+
+
+
 
 
 
@@ -190,5 +270,33 @@ public class SettingsActivity extends AppCompatActivity {
         Adapter previewAdapter = new Adapter(this, previewList, gridEnabled,true, iconSize, textSize,gridColumns);
         previewRecycler.setAdapter(previewAdapter);
     }
+
+    public boolean isDefaultLauncher() {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setPackage(null);
+
+        ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfo == null) return false;
+
+        String currentLauncherPackage = resolveInfo.activityInfo.packageName;
+        return getPackageName().equals(currentLauncherPackage);
+
+    }
+
+    private void animateClockFontChange(Typeface newTypeface) {
+        clock.animate()
+                .alpha(0f)
+                .setDuration(150)
+                .withEndAction(() -> {
+                    clock.setTypeface(newTypeface);
+                    clock.animate().alpha(1f).setDuration(150).start();
+                })
+                .start();
+    }
+
+
+
+
 
 }
