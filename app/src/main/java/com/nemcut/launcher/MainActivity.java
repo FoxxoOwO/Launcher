@@ -1,8 +1,5 @@
 package com.nemcut.launcher;
 
-import static java.security.AccessController.getContext;
-import static java.util.Locale.filter;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,37 +18,27 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.AlarmClock;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextClock;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.color.DynamicColors;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 
@@ -156,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(appChangeReceiver, filter);
 
         loadApps();
+
+        setupLayout();
     }
 
     private void vibrateDevice() {
@@ -201,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filter(s.toString());
+                adapter.filterList(s.toString());
             }
 
             @Override
@@ -222,6 +210,7 @@ public class MainActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
 
         searchText.setText("");
+        adapter.filterList("");
         searchLayout.setVisibility(View.GONE);
         textClock.setVisibility(View.VISIBLE);
         searchButton.setVisibility(View.VISIBLE);
@@ -242,15 +231,15 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private void filter(String text) {
-        List<AppInfo> filteredList = new ArrayList<>();
-        for (AppInfo app : appList) {
-            if (app.label.toLowerCase().contains(text.toLowerCase())) {
-                filteredList.add(app);
-            }
-        }
-        adapter.filterList(filteredList);
-    }
+//    private void filter(String text) {
+//        List<AppInfo> filteredList = new ArrayList<>();
+//        for (AppInfo app : appList) {
+//            if (app.label.toLowerCase().contains(text.toLowerCase())) {
+//                filteredList.add(app);
+//            }
+//        }
+//        adapter.filterList(filteredList);
+//    }
 
     private void setupLayout() {
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
@@ -356,8 +345,8 @@ public class MainActivity extends AppCompatActivity {
 
             // Aktualizace UI v hlavním vlákně
             runOnUiThread(() -> {
-                setupLayout();
                 if (adapter != null) {
+                    adapter.updateList(appList);
                     adapter.notifyDataSetChanged();
                 }
             });
@@ -391,6 +380,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleAppInstalled(String packageName) {
+        Log.d("AppChanges", "Instalace: " + packageName);
         // Načteme nově nainstalovanou aplikaci
         PackageManager pm = getPackageManager();
         try {
@@ -407,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Seřadíme a aktualizujeme UI
                 Collections.sort(appList, (a1, a2) -> a1.label.compareToIgnoreCase(a2.label));
-                runOnUiThread(() -> adapter.notifyDataSetChanged());
+                runOnUiThread(() -> adapter.updateList(appList));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -415,20 +405,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleAppUninstalled(String packageName) {
+        Log.d("AppChanges", "Odinstalace: " + packageName);
         // Odstraníme aplikaci ze seznamu
         for (int i = 0; i < appList.size(); i++) {
             if (appList.get(i).packageName.equals(packageName)) {
                 final int position = i;
                 runOnUiThread(() -> {
                     appList.remove(position);
+                    adapter.updateList(appList);
                     adapter.notifyItemRemoved(position);
                 });
                 break;
             }
         }
+
     }
 
     private void handleAppUpdated(String packageName) {
+        Log.d("AppChanges", "Aktualizace: " + packageName);
         // Aktualizujeme ikonu a název (pokud se změnily)
         PackageManager pm = getPackageManager();
         for (int i = 0; i < appList.size(); i++) {
@@ -445,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
                     updatedApp.label = newLabel;
                     updatedApp.icon = scaledIcon;
 
-                    runOnUiThread(() -> adapter.notifyItemChanged(position));
+                    runOnUiThread(() -> adapter.updateList(appList));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

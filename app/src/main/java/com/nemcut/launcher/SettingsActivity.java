@@ -1,7 +1,6 @@
 package com.nemcut.launcher;
 
 import static android.view.View.GONE;
-import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 import android.content.Intent;
@@ -11,17 +10,11 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.transition.AutoTransition;
-import android.transition.ChangeBounds;
-import android.transition.Fade;
 import android.transition.TransitionManager;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TextClock;
 import android.widget.TextView;
 
@@ -29,7 +22,6 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
