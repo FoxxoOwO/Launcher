@@ -130,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
         iconSizeSlider.setValue(iconSize);
         textSizeSlider.setValue(textSize);
 
-        getSupportActionBar().setTitle("Nastavení"); // nebo jiný text
+        getSupportActionBar().setTitle(R.string.settings); // nebo jiný text
 
         MaterialSwitch grid = findViewById(R.id.gridSwitch);
 
@@ -219,9 +219,9 @@ public class SettingsActivity extends AppCompatActivity {
 
 
         if (isDefaultLauncher()) {
-            defaultB.setText("Nastaveno jako výchozí domovská obrazovka");
+            defaultB.setText(R.string.default_launcher_true);
         } else {
-            defaultB.setText("Nastavit jako výchozí domovskou obrazovku");
+            defaultB.setText(R.string.default_launcher_false);
         }
 
         if (!gridEnabled) {
@@ -274,7 +274,7 @@ public class SettingsActivity extends AppCompatActivity {
     public boolean isDefaultLauncher() {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setPackage(null); // důležité – jinak se vrátí jen tvoje appka
+        intent.setPackage(null);
 
         ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if (resolveInfo == null) return false;

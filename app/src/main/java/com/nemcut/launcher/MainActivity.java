@@ -388,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleAppInstalled(String packageName) {
-        Log.d("AppChanges", "Instalace: " + packageName);
+        //Log.d("AppChanges", "Instalace: " + packageName);
         // Načteme nově nainstalovanou aplikaci
         PackageManager pm = getPackageManager();
         try {
@@ -413,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleAppUninstalled(String packageName) {
-        Log.d("AppChanges", "Odinstalace: " + packageName);
+        //Log.d("AppChanges", "Odinstalace: " + packageName);
         // Odstraníme aplikaci ze seznamu
         for (int i = 0; i < appList.size(); i++) {
             if (appList.get(i).packageName.equals(packageName)) {
@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleAppUpdated(String packageName) {
-        Log.d("AppChanges", "Aktualizace: " + packageName);
+        //Log.d("AppChanges", "Aktualizace: " + packageName);
         // Aktualizujeme ikonu a název (pokud se změnily)
         PackageManager pm = getPackageManager();
         for (int i = 0; i < appList.size(); i++) {

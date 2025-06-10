@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NOVO</string>
+    <string name="settings">Nastavení</string>
+    <string name="default_launcher_true">Nastaveno jako výchozí domovská obrazovka</string>
+    <string name="default_launcher_false">Nastavit jako výchozí domovskou obrazovku</string>
+    <string name="defaultL">Výchozí</string>
+    <string name="clock_font">Font hodin</string>
+    <string name="grid">Mřížka</string>
+    <string name="grid_off">Vypnuto</string>
+    <string name="grid_on">Zapnuto</string>
+    <string name="columns">Počet sloupců</string>
+    <string name="icon_size">Velikost ikon</string>
+    <string name="label_size">Velikost popisků</string>
+</resources>
