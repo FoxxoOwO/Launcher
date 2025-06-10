@@ -108,6 +108,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
         notifyDataSetChanged();
     }
 
+
     @Override
     public long getItemId(int position) {return position;}
 

@@ -60,7 +60,6 @@
         android:layout_marginEnd="24dp"
         android:background="@drawable/settings_24px"
         android:backgroundTint="@color/design_default_color_on_primary"
-        android:onClick="openSettings"
         app:layout_constraintBottom_toBottomOf="@+id/searchButton"
         app:layout_constraintEnd_toEndOf="parent" />
 

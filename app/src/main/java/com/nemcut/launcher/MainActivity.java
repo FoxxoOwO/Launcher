@@ -3,8 +3,10 @@ package com.nemcut.launcher;
 import static java.security.AccessController.getContext;
 import static java.util.Locale.filter;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -59,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     Adapter adapter;
     public static List<AppInfo> appList = new ArrayList<>();
+    private boolean isUserScrolling = false;
+    private boolean refresh = true;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,40 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         setClockFont();
 
-
-
-        Intent intent = new Intent(Intent.ACTION_MAIN, null);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        PackageManager pm = this.getPackageManager();
-        List<ResolveInfo> apps = pm.queryIntentActivities(intent, 0);
-
-        for (ResolveInfo resolveInfo : apps) {
-            String label = resolveInfo.loadLabel(pm).toString();
-            String packageName = resolveInfo.activityInfo.packageName;
-            Drawable icon;
-            try {
-                icon = resolveInfo.loadIcon(pm);
-            } catch (Exception e) {
-                icon = getDrawable(R.mipmap.ic_launcher);
-            }
-
-
-            Drawable scaledIcon = resizeDrawable(this, icon, 60, 60);  // 54 dp na px
-            appList.add(new AppInfo(label, packageName, scaledIcon));
-            //appList.add(new AppInfo(label, packageName, icon));
-        }
-
-        //seřazení listu podle abecedy
-        appList.sort(new Comparator<AppInfo>() {
-            @Override
-            public int compare(AppInfo a1, AppInfo a2) {
-                return a1.label.compareToIgnoreCase(a2.label);
-            }
-        });
-
-
-        setupLayout();
+        findViewById(R.id.settingsButton).setOnClickListener(v -> openSettings());
 
 
         //otevření budíků při kliknutí na hodiny
@@ -131,8 +103,15 @@ public class MainActivity extends AppCompatActivity {
         //NestedScrollView nsv = findViewById(R.id.nsv);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                isUserScrolling = (newState == RecyclerView.SCROLL_STATE_DRAGGING);
+            }
+            @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                if (!isUserScrolling) return;
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager != null) {
@@ -148,10 +127,12 @@ public class MainActivity extends AppCompatActivity {
 
                     if (lastVisible == totalItems - 1) {
                         vibrateDevice();
+                        isUserScrolling = false;
                     }
 
                     if (firstVisible == 0) {
                         vibrateDevice();
+                        isUserScrolling = false;
                     }
                 }
             }
@@ -163,6 +144,18 @@ public class MainActivity extends AppCompatActivity {
         );
 
 
+
+        // Registrace receiveru pro sledování změn aplikací
+        appChangeReceiver = new AppChangeReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        filter.addDataScheme("package");
+        registerReceiver(appChangeReceiver, filter);
+
+        loadApps();
     }
 
     private void vibrateDevice() {
@@ -176,9 +169,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void openSettings(View view) {
+    public void openSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
+        startActivityForResult(intent, 100);
+
     }
 
     public void search(){
@@ -246,6 +240,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
     private void filter(String text) {
         List<AppInfo> filteredList = new ArrayList<>();
         for (AppInfo app : appList) {
@@ -303,7 +299,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        setupLayout();
+        if (refresh) {
+            setupLayout(); // nebo refreshAppList(), atd.
+            refresh = false;
+        }
         setClockFont();
     }
 
@@ -319,6 +318,150 @@ public class MainActivity extends AppCompatActivity {
         return new BitmapDrawable(context.getResources(), bitmap);
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100) {
+            refresh = true;
+        }
+    }
+
+
+    private void loadApps() {
+        new Thread(() -> {
+            appList.clear();
+            Intent intent = new Intent(Intent.ACTION_MAIN, null);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+            PackageManager pm = getPackageManager();
+            List<ResolveInfo> apps = pm.queryIntentActivities(intent, 0);
+
+            for (ResolveInfo resolveInfo : apps) {
+                String label = resolveInfo.loadLabel(pm).toString();
+                String packageName = resolveInfo.activityInfo.packageName;
+                Drawable icon;
+                try {
+                    icon = resolveInfo.loadIcon(pm);
+                } catch (Exception e) {
+                    icon = getDrawable(R.mipmap.ic_launcher);
+                }
+
+                Drawable scaledIcon = resizeDrawable(this, icon, 60, 60);
+                appList.add(new AppInfo(label, packageName, scaledIcon));
+            }
+
+            // Seřazení na pozadí
+            Collections.sort(appList, (a1, a2) -> a1.label.compareToIgnoreCase(a2.label));
+
+            // Aktualizace UI v hlavním vlákně
+            runOnUiThread(() -> {
+                setupLayout();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }).start();
+    }
+
+
+
+    private AppChangeReceiver appChangeReceiver;
+
+    // Vnitřní třída pro sledování změn aplikací
+    private class AppChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            String packageName = intent.getData() != null ? intent.getData().getSchemeSpecificPart() : null;
+
+            if (packageName == null) return;
+
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                handleAppInstalled(packageName);
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
+                    Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) {
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    handleAppUninstalled(packageName);
+                }
+            } else if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
+                handleAppUpdated(packageName);
+            }
+        }
+    }
+
+    private void handleAppInstalled(String packageName) {
+        // Načteme nově nainstalovanou aplikaci
+        PackageManager pm = getPackageManager();
+        try {
+            Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
+            if (launchIntent != null) {
+                ResolveInfo resolveInfo = pm.resolveActivity(launchIntent, 0);
+                String label = resolveInfo.loadLabel(pm).toString();
+                Drawable icon = resolveInfo.loadIcon(pm);
+                Drawable scaledIcon = resizeDrawable(this, icon, 60, 60);
+
+                // Přidáme do seznamu
+                AppInfo newApp = new AppInfo(label, packageName, scaledIcon);
+                appList.add(newApp);
+
+                // Seřadíme a aktualizujeme UI
+                Collections.sort(appList, (a1, a2) -> a1.label.compareToIgnoreCase(a2.label));
+                runOnUiThread(() -> adapter.notifyDataSetChanged());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleAppUninstalled(String packageName) {
+        // Odstraníme aplikaci ze seznamu
+        for (int i = 0; i < appList.size(); i++) {
+            if (appList.get(i).packageName.equals(packageName)) {
+                final int position = i;
+                runOnUiThread(() -> {
+                    appList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                });
+                break;
+            }
+        }
+    }
+
+    private void handleAppUpdated(String packageName) {
+        // Aktualizujeme ikonu a název (pokud se změnily)
+        PackageManager pm = getPackageManager();
+        for (int i = 0; i < appList.size(); i++) {
+            if (appList.get(i).packageName.equals(packageName)) {
+                try {
+                    Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
+                    ResolveInfo resolveInfo = pm.resolveActivity(launchIntent, 0);
+                    String newLabel = resolveInfo.loadLabel(pm).toString();
+                    Drawable newIcon = resolveInfo.loadIcon(pm);
+                    Drawable scaledIcon = resizeDrawable(this, newIcon, 60, 60);
+
+                    final int position = i;
+                    AppInfo updatedApp = appList.get(position);
+                    updatedApp.label = newLabel;
+                    updatedApp.icon = scaledIcon;
+
+                    runOnUiThread(() -> adapter.notifyItemChanged(position));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Zrušení registrace receiveru
+        if (appChangeReceiver != null) {
+            unregisterReceiver(appChangeReceiver);
+        }
+    }
 
 
 

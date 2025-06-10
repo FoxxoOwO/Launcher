@@ -1,11 +1,26 @@
 package com.nemcut.launcher;
 
+import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.transition.AutoTransition;
+import android.transition.ChangeBounds;
+import android.transition.Fade;
+import android.transition.TransitionManager;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextClock;
 import android.widget.TextView;
@@ -45,6 +60,7 @@ public class SettingsActivity extends AppCompatActivity {
     private int clockFont;
     private int iconSize;
     private int textSize;
+    private Button defaultB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +82,7 @@ public class SettingsActivity extends AppCompatActivity {
         clock = findViewById(R.id.clock);
         iconSizeSlider = findViewById(R.id.iconSizeSlider);
         textSizeSlider = findViewById(R.id.textSizeSlider);
+        defaultB =  findViewById(R.id.defaultButton);
 
 
 
@@ -95,19 +112,19 @@ public class SettingsActivity extends AppCompatActivity {
 
         fontButton1.setOnClickListener(v->{
             var tf = ResourcesCompat.getFont(this,R.font.biorhyme);
-            clock.setTypeface(tf);
+            animateClockFontChange(tf);
             prefs.edit().putInt("clockFont", 1).apply();
         });
 
         fontButton2.setOnClickListener(v->{
             var tf = ResourcesCompat.getFont(this,R.font.akronim);
-            clock.setTypeface(tf);
+            animateClockFontChange(tf);
             prefs.edit().putInt("clockFont", 2).apply();
         });
 
         fontButton3.setOnClickListener(v->{
             var tf = ResourcesCompat.getFont(this,R.font.ar_one_sans);
-            clock.setTypeface(tf);
+            animateClockFontChange(tf);
             prefs.edit().putInt("clockFont", 3).apply();
         });
 
@@ -126,12 +143,28 @@ public class SettingsActivity extends AppCompatActivity {
         // showing the back button in action bar
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-
+        LinearLayout animatedContainer = findViewById(R.id.animatedContainer);
+        AutoTransition transition = new AutoTransition();
+        transition.setDuration(220);
+        transition.setInterpolator(new AccelerateDecelerateInterpolator());
         setupLayout();
 
         gridSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean("grid_enabled", isChecked).apply();
             gridEnabled = isChecked;
+//            fadeVisibility(findViewById(R.id.gridWidthText), isChecked);
+//            fadeVisibility(findViewById(R.id.gridWidthLayout), isChecked);
+//            fadeVisibility(findViewById(R.id.gridWidthSpace), isChecked);
+            TransitionManager.beginDelayedTransition(animatedContainer, transition);
+            if (isChecked) {
+                findViewById(R.id.gridWidthText).setVisibility(VISIBLE);
+                findViewById(R.id.gridWidthLayout).setVisibility(VISIBLE);
+                findViewById(R.id.gridWidthSpace).setVisibility(VISIBLE);
+            } else {
+                findViewById(R.id.gridWidthText).setVisibility(GONE);
+                findViewById(R.id.gridWidthLayout).setVisibility(GONE);
+                findViewById(R.id.gridWidthSpace).setVisibility(GONE);
+            }
             setupLayout();
         });
 
@@ -153,6 +186,29 @@ public class SettingsActivity extends AppCompatActivity {
             textSize = (int) value;
             setupLayout();
         });
+
+
+        defaultB.setOnClickListener(v -> {
+            Intent intent = new Intent(android.provider.Settings.ACTION_HOME_SETTINGS);
+            startActivity(intent);
+        });
+
+
+        if (isDefaultLauncher()) {
+            defaultB.setText("Nastaveno jako výchozí domovská obrazovka");
+        } else {
+            defaultB.setText("Nastavit jako výchozí domovskou obrazovku");
+        }
+
+        if (!gridEnabled) {
+            findViewById(R.id.gridWidthText).setVisibility(GONE);
+            findViewById(R.id.gridWidthLayout).setVisibility(GONE);
+            findViewById(R.id.gridWidthSpace).setVisibility(GONE);
+        }
+
+
+
+
 
 
 
@@ -190,5 +246,32 @@ public class SettingsActivity extends AppCompatActivity {
         Adapter previewAdapter = new Adapter(this, previewList, gridEnabled,true, iconSize, textSize,gridColumns);
         previewRecycler.setAdapter(previewAdapter);
     }
+
+    public boolean isDefaultLauncher() {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setPackage(null); // důležité – jinak se vrátí jen tvoje appka
+
+        ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfo == null) return false;
+
+        String currentLauncherPackage = resolveInfo.activityInfo.packageName;
+        return getPackageName().equals(currentLauncherPackage);
+
+    }
+
+    private void animateClockFontChange(Typeface newTypeface) {
+        clock.animate()
+                .alpha(0f)
+                .setDuration(150)
+                .withEndAction(() -> {
+                    clock.setTypeface(newTypeface);
+                    clock.animate().alpha(1f).setDuration(150).start();
+                })
+                .start();
+    }
+
+
+
 
 }

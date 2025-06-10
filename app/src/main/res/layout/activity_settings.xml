@@ -5,21 +5,25 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SettingsActivity">
+    tools:context=".SettingsActivity"
+    android:animateLayoutChanges="true">
 
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="1dp"
-        android:layout_marginEnd="16dp"
         android:layout_marginBottom="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:clipToPadding="false"
+        android:scrollbarStyle="outsideOverlay">
 
         <LinearLayout
+            android:id="@+id/animatedContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -28,6 +32,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
+
+            <Button
+                android:id="@+id/defaultButton"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Výchozí"
+                android:textAlignment="center"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="@color/design_default_color_on_primary"
+                android:textSize="14sp" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
 
             <TextView
                 android:id="@+id/textView"
@@ -94,6 +113,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
+
+
             <TextView
                 android:id="@+id/gridWidthText"
                 android:layout_width="match_parent"
@@ -103,6 +124,7 @@
                 android:textSize="20sp" />
 
             <LinearLayout
+                android:id="@+id/gridWidthLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="5dp"
@@ -127,14 +149,14 @@
                     android:layout_weight="10"
                     android:text="4"
                     android:textSize="20sp" />
+
+
             </LinearLayout>
 
-
-
             <Space
+                android:id="@+id/gridWidthSpace"
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
-
             <TextView
                 android:id="@+id/iconSizeText"
                 android:layout_width="match_parent"
@@ -183,6 +205,9 @@
                 android:clipToPadding="false"
                 android:overScrollMode="never"
                 android:padding="8dp" />
+
+
+
 
 
 
