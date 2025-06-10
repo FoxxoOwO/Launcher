@@ -3,12 +3,16 @@ package com.nemcut.launcher;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.transition.AutoTransition;
 import android.transition.TransitionManager;
 import android.view.MenuItem;
@@ -76,7 +80,7 @@ public class SettingsActivity extends AppCompatActivity {
         textSizeSlider = findViewById(R.id.textSizeSlider);
         defaultB =  findViewById(R.id.defaultButton);
 
-
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         SharedPreferences prefs = getSharedPreferences("settings", MODE_PRIVATE);
         gridEnabled = prefs.getBoolean("grid_enabled", false);
@@ -144,6 +148,13 @@ public class SettingsActivity extends AppCompatActivity {
         gridSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean("grid_enabled", isChecked).apply();
             gridEnabled = isChecked;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+                } else {
+                    vibrator.vibrate(10);
+                }
+            }
 //            fadeVisibility(findViewById(R.id.gridWidthText), isChecked);
 //            fadeVisibility(findViewById(R.id.gridWidthLayout), isChecked);
 //            fadeVisibility(findViewById(R.id.gridWidthSpace), isChecked);
@@ -164,18 +175,39 @@ public class SettingsActivity extends AppCompatActivity {
             widthLabel.setText(String.valueOf((int) value));
             prefs.edit().putInt("grid_columns", (int) value).apply();
             gridColumns = (int) value;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
+                } else {
+                    vibrator.vibrate(10);
+                }
+            }
             setupLayout();
         });
 
         iconSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
             prefs.edit().putInt("iconSize", (int) value).apply();
             iconSize = (int) value;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(3, 2));
+                } else {
+                    vibrator.vibrate(5);
+                }
+            }
             setupLayout();
         });
 
         textSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
             prefs.edit().putInt("textSize", (int) value).apply();
             textSize = (int) value;
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(3, 2));
+                } else {
+                    vibrator.vibrate(5);
+                }
+            }
             setupLayout();
         });
 
@@ -262,6 +294,7 @@ public class SettingsActivity extends AppCompatActivity {
                 })
                 .start();
     }
+
 
 
 

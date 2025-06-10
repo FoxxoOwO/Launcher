@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     Adapter adapter;
     public static List<AppInfo> appList = new ArrayList<>();
     private boolean isUserScrolling = false;
+    private boolean vibrationPending = false;
     private boolean refresh = true;
 
 
@@ -92,13 +93,15 @@ public class MainActivity extends AppCompatActivity {
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 isUserScrolling = (newState == RecyclerView.SCROLL_STATE_DRAGGING);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    vibrationPending = false; // reset flagu
+                }
             }
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
-                if (!isUserScrolling) return;
-
+                if (dy == 0 && dx == 0) return;
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
                 if (layoutManager != null) {
                     int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
@@ -110,16 +113,19 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-
-                    if (lastVisible == totalItems - 1) {
+                    if ((lastVisible == totalItems - 1 || firstVisible == 0) && !vibrationPending) {
                         vibrateDevice();
-                        isUserScrolling = false;
+                        vibrationPending = true; // blokace dalších vibrací
                     }
-
-                    if (firstVisible == 0) {
-                        vibrateDevice();
-                        isUserScrolling = false;
-                    }
+//                    if (lastVisible == totalItems - 1) {
+//                        vibrateDevice();
+//                        isUserScrolling = false;
+//                    }
+//
+//                    if (firstVisible == 0) {
+//                        vibrateDevice();
+//                        isUserScrolling = false;
+//                    }
                 }
             }
         });
@@ -150,9 +156,9 @@ public class MainActivity extends AppCompatActivity {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator != null && vibrator.hasVibrator()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
+                vibrator.vibrate(VibrationEffect.createOneShot(10, 120));
             } else {
-                vibrator.vibrate(30);
+                vibrator.vibrate(10);
             }
         }
     }
@@ -164,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void search(){
+        vibrateDevice();
         //Toast.makeText(this, "Nefunguje", Toast.LENGTH_SHORT).show();
         EditText searchText = findViewById(R.id.searchText);
         LinearLayout searchLayout = findViewById(R.id.searchLayout);
@@ -200,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void closeSearch(){
+        vibrateDevice();
         EditText searchText = findViewById(R.id.searchText);
         LinearLayout searchLayout = findViewById(R.id.searchLayout);
         TextClock textClock = findViewById(R.id.textClock);
