@@ -1,5 +1,6 @@
 package com.nemcut.launcher;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -225,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
         settingsButton.setVisibility(View.VISIBLE);
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onBackPressed() {
         LinearLayout searchLayout = findViewById(R.id.searchLayout);
@@ -232,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
             // Pokud je aktivní hledání, zavři ho
             closeSearch();
         } else {
-            // Jinak běž normálně zpět
             //super.onBackPressed();
         }
     }
