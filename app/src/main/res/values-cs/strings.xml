@@ -11,4 +11,7 @@
     <string name="columns">Počet sloupců</string>
     <string name="icon_size">Velikost ikon</string>
     <string name="label_size">Velikost popisků</string>
+    <string name="text_color">Text color</string>
+    <string name="white">Bílá</string>
+    <string name="black">Černá</string>
 </resources>

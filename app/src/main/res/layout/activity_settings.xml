@@ -197,6 +197,57 @@
                 android:valueTo="30"
                 app:labelBehavior="gone" />
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <TextView
+                android:id="@+id/textColor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/text_color"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textSize="20sp" />
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp">
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/radioWhite"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/white"
+                    android:textSize="16sp" />
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.radiobutton.MaterialRadioButton
+                    android:id="@+id/radioBlack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/black"
+                    android:textSize="16sp" />
+            </RadioGroup>
+
+<!--            <com.google.android.material.card.MaterialCardView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                app:cardBackgroundColor="@color/material_dynamic_neutral_variant50"-->
+<!--                app:cardCornerRadius="20dp"-->
+<!--                app:contentPaddingBottom="10dp"-->
+<!--                app:contentPaddingTop="10dp">-->
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/icon_preview_recycler"
                 android:layout_width="match_parent"
@@ -205,6 +256,7 @@
                 android:clipToPadding="false"
                 android:overScrollMode="never"
                 android:padding="8dp" />
+<!--            </com.google.android.material.card.MaterialCardView>-->
 
 
 

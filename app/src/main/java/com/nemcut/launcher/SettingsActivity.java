@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextClock;
 import android.widget.TextView;
 
@@ -35,6 +36,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.google.android.material.slider.Slider;
 
 import java.util.List;
@@ -57,6 +59,7 @@ public class SettingsActivity extends AppCompatActivity {
     private int iconSize;
     private int textSize;
     private Button defaultB;
+    private boolean whiteText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,8 @@ public class SettingsActivity extends AppCompatActivity {
         iconSizeSlider = findViewById(R.id.iconSizeSlider);
         textSizeSlider = findViewById(R.id.textSizeSlider);
         defaultB =  findViewById(R.id.defaultButton);
+        RadioButton radioWhite = findViewById(R.id.radioWhite);
+        RadioButton radioBlack = findViewById(R.id.radioBlack);
 
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -88,6 +93,7 @@ public class SettingsActivity extends AppCompatActivity {
         clockFont = prefs.getInt("clockFont", 3);
         iconSize = prefs.getInt("iconSize", 54);
         textSize = prefs.getInt("textSize", 20);
+        whiteText = prefs.getBoolean("white_text", true);
 
 
 
@@ -130,6 +136,14 @@ public class SettingsActivity extends AppCompatActivity {
         iconSizeSlider.setValue(iconSize);
         textSizeSlider.setValue(textSize);
 
+        if (whiteText) {
+            radioWhite.setChecked(true);
+        } else {
+            radioBlack.setChecked(true);
+        }
+
+
+
         getSupportActionBar().setTitle(R.string.settings); // nebo jiný text
 
         MaterialSwitch grid = findViewById(R.id.gridSwitch);
@@ -144,6 +158,18 @@ public class SettingsActivity extends AppCompatActivity {
         transition.setDuration(220);
         transition.setInterpolator(new AccelerateDecelerateInterpolator());
         setupLayout();
+
+        radioWhite.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                prefs.edit().putBoolean("white_text", isChecked).apply();
+                whiteText = true;
+                setupLayout();
+            } else {
+                prefs.edit().putBoolean("white_text", isChecked).apply();
+                whiteText = false;
+                setupLayout();
+            }
+        });
 
         gridSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefs.edit().putBoolean("grid_enabled", isChecked).apply();
@@ -267,7 +293,7 @@ public class SettingsActivity extends AppCompatActivity {
         //List<AppInfo> previewList = MainActivity.appList.subList(0, Math.min(MainActivity.appList.size(), gridColumns));
 
         // Vytvoř nový adapter (nebo uprav stávající, aby měl režim náhledu)
-        Adapter previewAdapter = new Adapter(this, previewList, gridEnabled,true, iconSize, textSize,gridColumns);
+        Adapter previewAdapter = new Adapter(this, previewList, gridEnabled,true, iconSize, textSize,gridColumns, whiteText);
         previewRecycler.setAdapter(previewAdapter);
     }
 
