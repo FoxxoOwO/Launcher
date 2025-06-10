@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NOVO</string>
+    <string name="app_name" translatable="false">Nyra</string>
     <string name="settings">Settings</string>
     <string name="default_launcher_true">NOVO is your default launcher</string>
     <string name="default_launcher_false">Set NOVO as your default launcher</string>

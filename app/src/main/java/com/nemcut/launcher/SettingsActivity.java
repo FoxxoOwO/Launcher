@@ -190,7 +190,7 @@ public class SettingsActivity extends AppCompatActivity {
             iconSize = (int) value;
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(3, 2));
+                    vibrator.vibrate(VibrationEffect.createOneShot(3, 3));
                 } else {
                     vibrator.vibrate(5);
                 }
@@ -203,7 +203,7 @@ public class SettingsActivity extends AppCompatActivity {
             textSize = (int) value;
             if (vibrator != null && vibrator.hasVibrator()) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(3, 2));
+                    vibrator.vibrate(VibrationEffect.createOneShot(3, 3));
                 } else {
                     vibrator.vibrate(5);
                 }
