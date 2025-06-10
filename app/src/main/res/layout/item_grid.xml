@@ -28,5 +28,7 @@
         android:layout_marginBottom="25dp"
         android:layout_marginHorizontal="5dp"
         android:breakStrategy="simple"
+        android:shadowColor="#000"
+        android:shadowRadius="2"
         android:hyphenationFrequency="none"/>
 </LinearLayout>
