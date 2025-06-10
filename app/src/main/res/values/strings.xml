@@ -11,4 +11,7 @@
     <string name="columns">Number of columns</string>
     <string name="icon_size">Icon size</string>
     <string name="label_size">Label size</string>
+    <string name="text_color">Text color</string>
+    <string name="white">White</string>
+    <string name="black">Black</string>
 </resources>

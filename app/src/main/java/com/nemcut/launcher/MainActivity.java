@@ -8,8 +8,10 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -23,6 +25,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -34,6 +38,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -148,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
         filter.addDataScheme("package");
         registerReceiver(appChangeReceiver, filter);
 
+
+
         loadApps();
 
         setupLayout();
@@ -256,6 +264,7 @@ public class MainActivity extends AppCompatActivity {
         int gridColumns = prefs.getInt("grid_columns", 4);
         int iconSize = prefs.getInt("iconSize", 54);
         int textSize = prefs.getInt("textSize", 20);
+        boolean whiteText = prefs.getBoolean("white_text", true);
 
         RecyclerView.LayoutManager layoutManager;
         if (gridEnabled) {
@@ -264,13 +273,36 @@ public class MainActivity extends AppCompatActivity {
             layoutManager = new LinearLayoutManager(this);
         }
 
+
+
+
+        int color = whiteText ? Color.WHITE : Color.BLACK;
+        TextClock textClock = findViewById(R.id.textClock);
+        textClock.setTextColor(color);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController insetsController = getWindow().getInsetsController();
+            if (insetsController != null) {
+                insetsController.setSystemBarsAppearance(
+                        !whiteText ? WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS : 0,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                );
+            }
+        }
+
+        findViewById(R.id.searchButton).setBackgroundTintList(ColorStateList.valueOf(color));
+        findViewById(R.id.settingsButton).setBackgroundTintList(ColorStateList.valueOf(color));
+        findViewById(R.id.closeButton).setBackgroundTintList(ColorStateList.valueOf(color));
+
+
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(30);
         recyclerView.setDrawingCacheEnabled(true);
         recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
-        adapter = new Adapter(this, appList, gridEnabled,false,iconSize,textSize,gridColumns);
+        adapter = new Adapter(this, appList, gridEnabled,false,iconSize,textSize,gridColumns,whiteText);
         adapter.setHasStableIds(true);
         recyclerView.setAdapter(adapter);
     }
@@ -293,6 +325,8 @@ public class MainActivity extends AppCompatActivity {
         }
         clock.setTypeface(typeface);
     }
+
+
 
     @Override
     protected void onResume() {

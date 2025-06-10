@@ -2,9 +2,12 @@ package com.nemcut.launcher;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,16 +31,36 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
     private int textSize;
     private int labelWidth;
     private String query;
+    private boolean whiteText = true;
 
-    public Adapter(Context context, List<AppInfo> appList, boolean isGrid, boolean isPreview, int iconSize, int textSize, int gridColumns) {
+    public Adapter(Context context, List<AppInfo> appList, boolean isGrid, boolean isPreview, int iconSize, int textSize, int gridColumns, boolean whiteText) {
         this.context = context;
         this.appList = appList;
         this.ogList = appList;
         this.isGrid = isGrid;
         this.isPreview = isPreview;
         this.textSize = textSize;
+        this.whiteText = whiteText;
 
-        this.labelWidth = 1300/gridColumns;
+
+        int totalMarginDp = 50; // 16dp na každé straně
+
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+
+        float totalMarginPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                totalMarginDp,
+                metrics
+        );
+
+        // dostupná šířka = šířka obrazovky - marginy
+        float usableWidthPx = metrics.widthPixels - totalMarginPx;
+
+        // šířka jedné položky
+        float itemWidthPx = usableWidthPx / gridColumns;
+
+
+        this.labelWidth = (int) itemWidthPx;
 
         float density = context.getResources().getDisplayMetrics().density;
         this.iconSize = Math.round(iconSize * density);
@@ -56,6 +79,14 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
     public void onBindViewHolder(@NonNull AppViewHolder holder, int position) {
         AppInfo app = appList.get(position);
         holder.label.setText(app.label);
+        if (!whiteText){
+            holder.label.setTextColor(Color.BLACK);
+            holder.label.setShadowLayer(1, 0, 0, Color.WHITE);
+        } else {
+            holder.label.setTextColor(Color.WHITE);
+            holder.label.setShadowLayer(2, 0, 0, Color.BLACK);
+        }
+
         holder.icon.setImageDrawable(app.icon);
 
         ViewGroup.LayoutParams params = holder.icon.getLayoutParams();
@@ -132,7 +163,10 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
         notifyDataSetChanged();
     }
 
-
+//    public void setColor(Boolean whiteText) {
+//        this.whiteText = whiteText;
+//        notifyDataSetChanged();
+//    }
 
     @Override
     public long getItemId(int position) {return position;}
