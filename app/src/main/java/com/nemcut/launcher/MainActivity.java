@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.List;
 
 
+
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isUserScrolling = false;
     private boolean vibrationPending = false;
     private boolean refresh = true;
+    private volatile boolean isLoading = false;
+
 
 
     @Override
@@ -361,6 +364,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void loadApps() {
+        if (isLoading) return;
+        isLoading = true;
+
         new Thread(() -> {
             appList.clear();
             Intent intent = new Intent(Intent.ACTION_MAIN, null);
@@ -392,6 +398,7 @@ public class MainActivity extends AppCompatActivity {
                     adapter.updateList(appList);
                     adapter.notifyDataSetChanged();
                 }
+                isLoading = false;
             });
         }).start();
     }
@@ -425,70 +432,72 @@ public class MainActivity extends AppCompatActivity {
     private void handleAppInstalled(String packageName) {
         //Log.d("AppChanges", "Instalace: " + packageName);
         // Načteme nově nainstalovanou aplikaci
-        PackageManager pm = getPackageManager();
-        try {
-            Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
-            if (launchIntent != null) {
-                ResolveInfo resolveInfo = pm.resolveActivity(launchIntent, 0);
-                String label = resolveInfo.loadLabel(pm).toString();
-                Drawable icon = resolveInfo.loadIcon(pm);
-                Drawable scaledIcon = resizeDrawable(this, icon, 60, 60);
-
-                // Přidáme do seznamu
-                AppInfo newApp = new AppInfo(label, packageName, scaledIcon);
-                appList.add(newApp);
-
-                // Seřadíme a aktualizujeme UI
-                Collections.sort(appList, (a1, a2) -> a1.label.compareToIgnoreCase(a2.label));
-                runOnUiThread(() -> adapter.updateList(appList));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        PackageManager pm = getPackageManager();
+//        try {
+//            Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
+//            if (launchIntent != null) {
+//                ResolveInfo resolveInfo = pm.resolveActivity(launchIntent, 0);
+//                String label = resolveInfo.loadLabel(pm).toString();
+//                Drawable icon = resolveInfo.loadIcon(pm);
+//                Drawable scaledIcon = resizeDrawable(this, icon, 60, 60);
+//
+//                // Přidáme do seznamu
+//                AppInfo newApp = new AppInfo(label, packageName, scaledIcon);
+//                appList.add(newApp);
+//
+//                // Seřadíme a aktualizujeme UI
+//                Collections.sort(appList, (a1, a2) -> a1.label.compareToIgnoreCase(a2.label));
+//                runOnUiThread(() -> adapter.updateList(appList));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        loadApps();
     }
 
     private void handleAppUninstalled(String packageName) {
         //Log.d("AppChanges", "Odinstalace: " + packageName);
         // Odstraníme aplikaci ze seznamu
-        for (int i = 0; i < appList.size(); i++) {
-            if (appList.get(i).packageName.equals(packageName)) {
-                final int position = i;
-                runOnUiThread(() -> {
-                    appList.remove(position);
-                    adapter.updateList(appList);
-                    adapter.notifyItemRemoved(position);
-                });
-                break;
-            }
-        }
-
+//        for (int i = 0; i < appList.size(); i++) {
+//            if (appList.get(i).packageName.equals(packageName)) {
+//                final int position = i;
+//                runOnUiThread(() -> {
+//                    appList.remove(position);
+//                    adapter.updateList(appList);
+//                    adapter.notifyItemRemoved(position);
+//                });
+//                break;
+//            }
+//        }
+        loadApps();
     }
 
     private void handleAppUpdated(String packageName) {
         //Log.d("AppChanges", "Aktualizace: " + packageName);
         // Aktualizujeme ikonu a název (pokud se změnily)
-        PackageManager pm = getPackageManager();
-        for (int i = 0; i < appList.size(); i++) {
-            if (appList.get(i).packageName.equals(packageName)) {
-                try {
-                    Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
-                    ResolveInfo resolveInfo = pm.resolveActivity(launchIntent, 0);
-                    String newLabel = resolveInfo.loadLabel(pm).toString();
-                    Drawable newIcon = resolveInfo.loadIcon(pm);
-                    Drawable scaledIcon = resizeDrawable(this, newIcon, 60, 60);
-
-                    final int position = i;
-                    AppInfo updatedApp = appList.get(position);
-                    updatedApp.label = newLabel;
-                    updatedApp.icon = scaledIcon;
-
-                    runOnUiThread(() -> adapter.updateList(appList));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
+//        PackageManager pm = getPackageManager();
+//        for (int i = 0; i < appList.size(); i++) {
+//            if (appList.get(i).packageName.equals(packageName)) {
+//                try {
+//                    Intent launchIntent = pm.getLaunchIntentForPackage(packageName);
+//                    ResolveInfo resolveInfo = pm.resolveActivity(launchIntent, 0);
+//                    String newLabel = resolveInfo.loadLabel(pm).toString();
+//                    Drawable newIcon = resolveInfo.loadIcon(pm);
+//                    Drawable scaledIcon = resizeDrawable(this, newIcon, 60, 60);
+//
+//                    final int position = i;
+//                    AppInfo updatedApp = appList.get(position);
+//                    updatedApp.label = newLabel;
+//                    updatedApp.icon = scaledIcon;
+//
+//                    runOnUiThread(() -> adapter.updateList(appList));
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                break;
+//            }
+//        }
+        loadApps();
     }
 
     @Override
