@@ -163,10 +163,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.AppViewHolder> {
         notifyDataSetChanged();
     }
 
-//    public void setColor(Boolean whiteText) {
-//        this.whiteText = whiteText;
-//        notifyDataSetChanged();
-//    }
 
     @Override
     public long getItemId(int position) {return position;}

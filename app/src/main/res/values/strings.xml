@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">Nyra</string>
     <string name="settings">Settings</string>
-    <string name="default_launcher_true">NOVO is your default launcher</string>
-    <string name="default_launcher_false">Set NOVO as your default launcher</string>
+    <string name="default_launcher_true">Nyra is your default launcher</string>
+    <string name="default_launcher_false">Set Nyra as your default launcher</string>
     <string name="defaultL">Default</string>
     <string name="clock_font">Clock font</string>
     <string name="grid">Grid</string>
